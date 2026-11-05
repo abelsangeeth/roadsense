@@ -1,5 +1,7 @@
 # RoadSense
 
+[![tests](https://github.com/abelsangeeth/roadsense/actions/workflows/tests.yml/badge.svg)](https://github.com/abelsangeeth/roadsense/actions/workflows/tests.yml)
+
 **An intelligent traffic-sign and road-condition detection framework using CNNs.**
 
 RoadSense looks at a forward-facing camera frame and answers three questions a driver
