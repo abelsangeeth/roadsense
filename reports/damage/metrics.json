@@ -1,0 +1,125 @@
+{
+  "val": {
+    "mAP50": 0.56756357885913,
+    "per_class": {
+      "longitudinal crack": {
+        "AP50": 0.5656109416364213,
+        "AP50:95": 0.2801471804748515,
+        "n_gt": 2497
+      },
+      "transverse crack": {
+        "AP50": 0.5362399664749402,
+        "AP50:95": 0.23568760965778215,
+        "n_gt": 1028
+      },
+      "alligator crack": {
+        "AP50": 0.6560046767168763,
+        "AP50:95": 0.31925015424614955,
+        "n_gt": 1026
+      },
+      "pothole": {
+        "AP50": 0.512398730608282,
+        "AP50:95": 0.21018927749166946,
+        "n_gt": 708
+      }
+    },
+    "mAP50:95": 0.2613185554676132,
+    "best_f1": {
+      "F1": 0.5779844334377843,
+      "threshold": 0.7387253046035767,
+      "precision": 0.6169615882606819,
+      "recall": 0.5436394751853965
+    },
+    "n_images": 3599
+  },
+  "test": {
+    "mAP50": 0.5789261744926726,
+    "per_class": {
+      "longitudinal crack": {
+        "AP50": 0.5867247516260607,
+        "AP50:95": 0.2962363250661239,
+        "n_gt": 2386
+      },
+      "transverse crack": {
+        "AP50": 0.5652414921630183,
+        "AP50:95": 0.24410748939352372,
+        "n_gt": 1035
+      },
+      "alligator crack": {
+        "AP50": 0.6614149315163984,
+        "AP50:95": 0.33224479880878566,
+        "n_gt": 989
+      },
+      "pothole": {
+        "AP50": 0.5023235226652129,
+        "AP50:95": 0.21362977753629075,
+        "n_gt": 611
+      }
+    },
+    "mAP50:95": 0.271554597701181,
+    "best_f1": {
+      "F1": 0.5895906192141535,
+      "threshold": 0.719931960105896,
+      "precision": 0.6096575196766646,
+      "recall": 0.5708026289583749
+    },
+    "at_val_threshold": {
+      "threshold": 0.7387253046035767,
+      "precision": 0.6218375499334221,
+      "recall": 0.5580561641107349,
+      "F1": 0.58822294531332
+    },
+    "n_images": 3597
+  },
+  "test_by_country": {
+    "Japan": {
+      "mAP50": 0.5782494423218023,
+      "F1_at_val_threshold": 0.5850860420650095,
+      "n_images": 1050
+    },
+    "India": {
+      "mAP50": 0.32587599594302574,
+      "F1_at_val_threshold": 0.4534412955465587,
+      "n_images": 770
+    },
+    "Czech": {
+      "mAP50": 0.3269074553482999,
+      "F1_at_val_threshold": 0.4634146341463415,
+      "n_images": 283
+    },
+    "Norway": {
+      "mAP50": 0.3498706789236967,
+      "F1_at_val_threshold": 0.45338208409506403,
+      "n_images": 816
+    },
+    "United_States": {
+      "mAP50": 0.5602947600076117,
+      "F1_at_val_threshold": 0.6881143878462913,
+      "n_images": 481
+    },
+    "China_MotorBike": {
+      "mAP50": 0.8673857471000967,
+      "F1_at_val_threshold": 0.7871720116618076,
+      "n_images": 197
+    }
+  },
+  "threshold": 0.7387253046035767,
+  "train_minutes": 314.96,
+  "config": {
+    "out": "runs\\damage",
+    "epochs": 6,
+    "bs": 4,
+    "lr": 0.01,
+    "seed": 0,
+    "limit": 0,
+    "resume": false
+  },
+  "gtsdb_german_frames": {
+    "gtsdb_test_frames": 54,
+    "frames_with_any_damage": 4,
+    "frames_with_pothole": 0,
+    "detections_by_class": {
+      "longitudinal crack": 5
+    }
+  }
+}

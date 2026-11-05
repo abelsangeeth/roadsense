@@ -1,0 +1,33 @@
+{
+  "split": "test",
+  "n_images": 54,
+  "n_gt": 82,
+  "detection_class_agnostic": {
+    "AP50": 0.9571490795401918,
+    "recall@0.5score": 0.9634146341463414,
+    "precision@0.5score": 0.9753086419753086,
+    "AP75": 0.9571490795401918,
+    "AP50:95": 0.8352533320698965,
+    "n_gt": 82,
+    "n_images": 54
+  },
+  "detection_class_aware_43": {
+    "AP50": 0.9471985767543295,
+    "recall@0.5score": 0.9512195121951219,
+    "precision@0.5score": 0.9629629629629629,
+    "AP75": 0.9471985767543295,
+    "AP50:95": 0.827390640034167,
+    "n_gt": 82,
+    "n_images": 54
+  },
+  "operating_point": {
+    "detector_threshold": 0.86,
+    "recall": 0.9512195121951219,
+    "recognition_rate": 0.9390243902439024,
+    "classification_acc_of_found": 0.9871794871794872,
+    "false_positives_per_image": 0.037037037037037035
+  },
+  "latency_ms_median": 120.54634999367408,
+  "fps": 8.295564320715451,
+  "device": "cuda"
+}

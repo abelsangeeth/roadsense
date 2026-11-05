@@ -1,0 +1,51 @@
+RoadSense: how to run it
+========================
+
+What it does: give it a dashcam photo or video and it finds traffic signs, potholes and
+cracks, reads the road surface, and suggests a safe speed. The models are already trained
+and included; you do not need a GPU or any datasets.
+
+You need: Python 3.10 or newer (https://www.python.org/downloads/ ; on Windows tick
+"Add python.exe to PATH" during install) and about 3 GB of free disk space for the
+Python packages.
+
+
+WINDOWS (easiest)
+-----------------
+Double-click run_windows.bat.
+The first time it installs the packages (5-10 minutes, needs internet). Later runs start
+in about 20 seconds, and the browser opens http://127.0.0.1:8765 by itself (if the page is
+blank, wait until the window says "Uvicorn running" and refresh).
+Close the black window to stop it.
+
+
+ANY SYSTEM (manual)
+-------------------
+Open a terminal in this folder and run:
+
+    python -m venv venv
+    venv\Scripts\activate              (Windows)
+    source venv/bin/activate           (macOS / Linux)
+    pip install torch torchvision
+    pip install -r requirements.txt
+    python -m uvicorn serve.app:app --host 127.0.0.1 --port 8765
+
+Then open http://127.0.0.1:8765.
+
+If you have an NVIDIA GPU, install torch with
+    pip install torch torchvision --index-url https://download.pytorch.org/whl/cu128
+instead, and it will use the GPU automatically.
+
+
+USING IT
+--------
+* Click one of the sample images, or drag in your own photo or video.
+* "Scene" mode is for dashcam views: signs, potholes / cracks and the advised speed.
+* "Sign crop" mode is for a photo of a single sign.
+* "Road patch" mode is for a close-up photo of the road surface (wet, icy, gravel...).
+* The "Model card" tab shows how accurate each model is and how it was tested.
+
+Speed: on a laptop CPU each frame takes about 3-5 seconds, so photos work well but live
+video is slow. With an NVIDIA GPU it runs at several frames per second.
+
+Full details: README.md. Test results: the reports/ folder.

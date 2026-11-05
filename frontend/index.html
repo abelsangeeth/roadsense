@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RoadSense</title>
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f4f2; --surface: #fcfcfb; --surface-2: #efeeea; --line: #e1e0db;
+  --text: #0b0b0b; --text-2: #52514e; --muted: #8a8984;
+  --accent: #2a78d6; --accent-ink: #ffffff;
+  --good: #0e8a4f; --warn: #b77800; --serious: #d0561f; --critical: #c93434;
+  --bar: #2a78d6; --bar-track: #e6e5e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #111110; --surface: #1a1a19; --surface-2: #232321; --line: #2f2f2c;
+    --text: #f0efec; --text-2: #c3c2b7; --muted: #8d8c85;
+    --accent: #3987e5; --accent-ink: #ffffff;
+    --good: #2fb873; --warn: #e0a51e; --serious: #ec7a45; --critical: #ef6262;
+    --bar: #3987e5; --bar-track: #2c2c2a;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111110; --surface: #1a1a19; --surface-2: #232321; --line: #2f2f2c;
+  --text: #f0efec; --text-2: #c3c2b7; --muted: #8d8c85;
+  --accent: #3987e5; --accent-ink: #ffffff;
+  --good: #2fb873; --warn: #e0a51e; --serious: #ec7a45; --critical: #ef6262;
+  --bar: #3987e5; --bar-track: #2c2c2a;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+header { display: flex; align-items: center; gap: 16px; padding: 12px 20px; border-bottom: 1px solid var(--line); background: var(--surface); position: sticky; top: 0; z-index: 5; }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+.logo svg { width: 26px; height: 26px; }
+.sub { color: var(--muted); font-size: 12px; }
+nav { margin-left: auto; display: flex; gap: 4px; }
+nav button, .seg button { border: 1px solid var(--line); background: var(--surface); color: var(--text-2); padding: 6px 12px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 13px; }
+nav button[aria-selected="true"], .seg button[aria-pressed="true"] { background: var(--text); color: var(--surface); border-color: var(--text); }
+.pill { font-size: 12px; color: var(--text-2); padding: 3px 9px; border-radius: 99px; background: var(--surface-2); white-space: nowrap; }
+main { display: grid; grid-template-columns: 300px minmax(0, 1fr) 360px; gap: 16px; padding: 16px 20px; max-width: 1600px; margin: 0 auto; }
+@media (max-width: 1180px) { main { grid-template-columns: 1fr; padding: 12px 16px; } }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px; }
+.card + .card { margin-top: 12px; }
+h2 { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+.drop { border: 1.5px dashed var(--line); border-radius: 10px; padding: 22px 12px; text-align: center; color: var(--text-2); cursor: pointer; transition: border-color .15s, background .15s; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--surface-2); }
+.seg { display: flex; gap: 4px; margin: 10px 0 4px; }
+.seg button { flex: 1; padding: 6px 4px; }
+.hint { color: var(--muted); font-size: 12px; margin: 6px 0 0; }
+.samples { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.samples img { width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid var(--line); }
+.samples img:hover { outline: 2px solid var(--accent); }
+.row { display: flex; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--line); background: var(--surface-2); color: var(--text); padding: 7px 12px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 13px; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.viewer { position: relative; background: var(--surface-2); border-radius: 12px; min-height: 420px; display: grid; place-items: center; overflow: hidden; border: 1px solid var(--line); }
+.viewer canvas { max-width: 100%; max-height: 72vh; display: block; }
+.viewer video { display: none; }
+.empty { color: var(--muted); text-align: center; padding: 40px; }
+.empty b { color: var(--text-2); display: block; font-size: 16px; margin-bottom: 4px; }
+.timings { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+.adv { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; }
+.speed { width: 96px; height: 96px; border-radius: 50%; border: 9px solid #d33; background: #fff; color: #111; display: grid; place-items: center; font-weight: 800; font-size: 30px; letter-spacing: -.03em; }
+.speed.none { border-color: var(--line); color: var(--muted); font-size: 13px; font-weight: 600; background: var(--surface-2); }
+.kv { display: grid; grid-template-columns: auto 1fr; gap: 3px 10px; font-size: 13px; }
+.kv span:nth-child(odd) { color: var(--muted); }
+.hazard { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 13px; padding: 3px 10px; border-radius: 99px; }
+.hazard svg { width: 14px; height: 14px; }
+.h0 { color: var(--good); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.h1 { color: var(--warn); background: color-mix(in srgb, var(--warn) 16%, transparent); }
+.h2 { color: var(--serious); background: color-mix(in srgb, var(--serious) 15%, transparent); }
+.h3 { color: var(--critical); background: color-mix(in srgb, var(--critical) 15%, transparent); }
+ul.msgs { margin: 10px 0 0; padding-left: 18px; color: var(--text-2); font-size: 13px; }
+.sign { display: grid; grid-template-columns: 56px 56px 1fr; gap: 10px; align-items: center; padding: 8px 0; border-top: 1px solid var(--line); }
+.sign:first-of-type { border-top: 0; }
+.sign img { width: 56px; height: 56px; border-radius: 6px; image-rendering: pixelated; background: var(--surface-2); }
+.sign .name { font-weight: 600; }
+.sign .meta { color: var(--muted); font-size: 12px; }
+.rej { opacity: .55; }
+.bars { display: grid; gap: 6px; }
+.bar { display: grid; grid-template-columns: 92px 1fr 44px; gap: 8px; align-items: center; font-size: 13px; }
+.bar .track { height: 8px; background: var(--bar-track); border-radius: 4px; overflow: hidden; }
+.bar .fill { height: 100%; background: var(--bar); border-radius: 0 4px 4px 0; }
+.bar .v { text-align: right; color: var(--text-2); font-variant-numeric: tabular-nums; }
+.big { font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+#card-view { display: none; padding: 16px 20px; max-width: 1200px; margin: 0 auto; }
+.metrics { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 12px; }
+.metric .n { font-size: 26px; font-weight: 750; letter-spacing: -.02em; }
+.metric .l { color: var(--muted); font-size: 12px; }
+.figs img { width: 100%; border-radius: 8px; border: 1px solid var(--line); margin-top: 8px; background: #fcfcfb; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; }
+td, th { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; }
+th { color: var(--muted); font-weight: 600; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.spin { width: 18px; height: 18px; border: 2px solid var(--line); border-top-color: var(--accent); border-radius: 50%; animation: s 0.8s linear infinite; }
+@keyframes s { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M16 2 30 28H2z" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linejoin="round"/><path d="M16 11v9M16 23.5v.5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+    <div>RoadSense<div class="sub">Traffic sign &amp; road condition intelligence</div></div>
+  </div>
+  <span class="pill" id="device">connecting…</span>
+  <nav>
+    <button id="tab-live" aria-selected="true">Analyzer</button>
+    <button id="tab-card" aria-selected="false">Model card</button>
+    <button id="theme" title="Toggle theme" aria-label="Toggle theme">◐</button>
+  </nav>
+</header>
+
+<main id="live-view">
+  <section>
+    <div class="card">
+      <h2>Input</h2>
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept="image/*,video/*" hidden>
+        <b>Drop an image or video</b><br><span class="hint">or click to browse</span>
+      </label>
+      <div class="seg" role="group" aria-label="Mode">
+        <button data-mode="scene" aria-pressed="true">Scene</button>
+        <button data-mode="sign" aria-pressed="false">Sign crop</button>
+        <button data-mode="surface" aria-pressed="false">Road patch</button>
+      </div>
+      <p class="hint" id="mode-hint"></p>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="cam">Use camera</button>
+        <button class="btn" id="stop" hidden>Stop stream</button>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Samples (held-out test data)</h2>
+      <div class="samples" id="samples"></div>
+    </div>
+  </section>
+
+  <section>
+    <div class="viewer" id="viewer">
+      <div class="empty" id="empty"><b>No input yet</b>Pick a sample or drop a dashcam frame, a sign, or a road-surface photo.</div>
+      <canvas id="canvas" hidden></canvas>
+      <video id="video" muted playsinline loop></video>
+    </div>
+    <div class="timings" id="timings"></div>
+  </section>
+
+  <section>
+    <div class="card" id="advisory-card">
+      <h2>Driving advisory</h2>
+      <div class="adv">
+        <div class="speed none" id="speed">no limit</div>
+        <div>
+          <div id="hazard"></div>
+          <div class="kv" style="margin-top:8px" id="adv-kv"></div>
+        </div>
+      </div>
+      <ul class="msgs" id="msgs"></ul>
+    </div>
+    <div class="card">
+      <h2>Traffic signs</h2>
+      <div id="signs"><span class="hint">—</span></div>
+    </div>
+    <div class="card">
+      <h2>Road surface</h2>
+      <div id="surface"><span class="hint">—</span></div>
+    </div>
+    <div class="card">
+      <h2>Road damage</h2>
+      <div id="damage"><span class="hint">—</span></div>
+    </div>
+  </section>
+</main>
+
+<section id="card-view"></section>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const HINTS = {
+  scene: "Full dashcam frame: signs are detected, then recognised; cracks and potholes are detected; the road surface is read from the lane ahead (dashed box).",
+  sign: "A single cropped sign, roughly centred.",
+  surface: "A close-up photo of the road surface ahead of the vehicle.",
+};
+const HAZ = ["Low risk", "Moderate", "High risk", "Severe"];
+const ICON = [
+  '<svg viewBox="0 0 16 16"><path d="M3 8.5 6.5 12 13 4.5" fill="none" stroke="currentColor" stroke-width="2"/></svg>',
+  '<svg viewBox="0 0 16 16"><path d="M8 2 15 14H1z" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 6.5v3.5" stroke="currentColor" stroke-width="1.8"/></svg>',
+  '<svg viewBox="0 0 16 16"><path d="M8 2 15 14H1z" fill="currentColor"/><path d="M8 6.5v3.5M8 11.8v.4" stroke="var(--surface)" stroke-width="1.8"/></svg>',
+  '<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="7" fill="currentColor"/><path d="M5 5l6 6M11 5l-6 6" stroke="var(--surface)" stroke-width="1.8"/></svg>',
+];
+const DMG_COL = { "pothole": "#d93f3f", "alligator crack": "#c2410c", "longitudinal crack": "#a16207", "transverse crack": "#a16207" };
+let mode = "scene", currentLimit = null, stream = null, busy = false, smooth = null;
+
+function setMode(m) {
+  mode = m;
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", b.dataset.mode === m));
+  $("mode-hint").textContent = HINTS[m];
+}
+document.querySelectorAll(".seg button").forEach(b => b.onclick = () => setMode(b.dataset.mode));
+setMode("scene");
+
+$("theme").onclick = () => {
+  const r = document.documentElement;
+  const dark = r.dataset.theme ? r.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+  r.dataset.theme = dark ? "light" : "dark";
+};
+$("tab-live").onclick = () => { $("live-view").style.display = ""; $("card-view").style.display = "none"; $("tab-live").setAttribute("aria-selected", true); $("tab-card").setAttribute("aria-selected", false); };
+$("tab-card").onclick = () => { $("live-view").style.display = "none"; $("card-view").style.display = "block"; $("tab-card").setAttribute("aria-selected", true); $("tab-live").setAttribute("aria-selected", false); loadCard(); };
+
+fetch("/api/health").then(r => r.json()).then(h => $("device").textContent = `${h.device.startsWith("cuda") ? "GPU" : "CPU"} · detector ${h.detector ? "on" : "off"} · surface ${h.surface ? "on" : "off"} · damage ${h.damage ? "on" : "off"}`)
+  .catch(() => $("device").textContent = "API offline");
+
+fetch("/api/samples").then(r => r.json()).then(list => {
+  for (const s of list) {
+    const im = new Image(); im.src = s.url; im.alt = `${s.mode} sample ${s.name}`; im.title = `${s.mode}: ${s.name}`;
+    im.onclick = async () => { setMode(s.mode); stopStream(); currentLimit = null; smooth = null; const b = await (await fetch(s.url)).blob(); runImage(b); };
+    $("samples").append(im);
+  }
+});
+
+// ---------------------------------------------------------------- input handling
+const drop = $("drop");
+drop.addEventListener("dragover", e => { e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", () => drop.classList.remove("over"));
+drop.addEventListener("drop", e => { e.preventDefault(); drop.classList.remove("over"); handleFile(e.dataTransfer.files[0]); });
+$("file").onchange = e => handleFile(e.target.files[0]);
+
+function handleFile(f) {
+  if (!f) return;
+  stopStream(); currentLimit = null; smooth = null;
+  if (f.type.startsWith("video/")) { const v = $("video"); v.src = URL.createObjectURL(f); v.play(); startLoop(v); }
+  else runImage(f);
+}
+
+$("cam").onclick = async () => {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+    const v = $("video"); v.srcObject = stream; await v.play(); setMode("scene"); startLoop(v);
+  } catch (e) { alert("Camera unavailable: " + e.message); }
+};
+$("stop").onclick = stopStream;
+
+let loopTimer = null;
+function startLoop(v) {
+  $("stop").hidden = false;
+  const tick = async () => {
+    if (!v.paused && v.videoWidth && !busy) {
+      const c = document.createElement("canvas"); c.width = v.videoWidth; c.height = v.videoHeight;
+      c.getContext("2d").drawImage(v, 0, 0);
+      const blob = await new Promise(r => c.toBlob(r, "image/jpeg", 0.9));
+      await runImage(blob, false, c);
+    }
+    loopTimer = setTimeout(tick, 120);
+  };
+  tick();
+}
+function stopStream() {
+  clearTimeout(loopTimer); loopTimer = null; $("stop").hidden = true;
+  const v = $("video"); v.pause(); if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; } v.removeAttribute("src"); v.srcObject = null;
+}
+
+async function runImage(blob, explain = true, srcCanvas = null) {
+  busy = true;
+  const fd = new FormData();
+  fd.append("file", blob, "frame.jpg"); fd.append("mode", mode); fd.append("explain", explain);
+  if (currentLimit) fd.append("current_limit", currentLimit);
+  if (!srcCanvas) $("timings").innerHTML = '<div class="spin"></div>';
+  try {
+    const res = await (await fetch("/api/analyze", { method: "POST", body: fd })).json();
+    if (res.detail) throw new Error(res.detail);
+    if (srcCanvas == null) {
+      const bmp = await createImageBitmap(blob);
+      draw(bmp, res);
+    } else draw(srcCanvas, res);
+    if (res.advisory.posted_limit_kmh) currentLimit = res.advisory.posted_limit_kmh;  // limit persists between frames
+    render(res, !!srcCanvas);
+  } catch (e) { $("timings").innerHTML = `<span class="pill">Error: ${e.message}</span>`; }
+  busy = false;
+}
+
+// ---------------------------------------------------------------- drawing
+function draw(src, res) {
+  const c = $("canvas"); c.hidden = false; $("empty").hidden = true;
+  c.width = src.width; c.height = src.height;
+  const g = c.getContext("2d"); g.drawImage(src, 0, 0);
+  const s = Math.max(1, c.width / 900);
+  if (res.surface && res.surface.roi) {
+    const [x1, y1, x2, y2] = res.surface.roi;
+    g.setLineDash([8 * s, 6 * s]); g.lineWidth = 2 * s; g.strokeStyle = "rgba(255,255,255,.85)"; g.strokeRect(x1, y1, x2 - x1, y2 - y1); g.setLineDash([]);
+    label(g, res.surface.in_domain === false ? "road: outside training domain" : `road: ${res.surface.class.replaceAll("_", " ")}`,
+          x1, y2 + 2 * s, s, "rgba(20,20,20,.75)", true);
+  }
+  if (res.mode !== "scene") return;
+  for (const d of res.damage || []) {
+    const [x1, y1, x2, y2] = d.box;
+    const col = DMG_COL[d.name];
+    g.setLineDash([5 * s, 3 * s]); g.lineWidth = 2.5 * s; g.strokeStyle = col; g.strokeRect(x1, y1, x2 - x1, y2 - y1); g.setLineDash([]);
+    label(g, `${d.name} ${(d.score * 100).toFixed(0)}%`, x1, y1, s, col);
+  }
+  for (const sg of res.signs) {
+    const [x1, y1, x2, y2] = sg.box;
+    const col = sg.accepted ? "#1baf7a" : "#eda100";
+    g.lineWidth = 3 * s; g.strokeStyle = col; g.strokeRect(x1, y1, x2 - x1, y2 - y1);
+    label(g, `${sg.accepted ? sg.name : "uncertain"} ${(sg.conf * 100).toFixed(0)}%`, x1, y1, s, col);
+  }
+}
+function label(g, t, x, y, s, bg, below = false) {
+  g.font = `600 ${13 * s}px system-ui, sans-serif`;
+  const w = g.measureText(t).width + 10 * s, h = 19 * s;
+  const yy = below ? y : Math.max(0, y - h);
+  x = Math.max(0, Math.min(x, g.canvas.width - w));  // keep labels of edge boxes on the canvas
+  g.fillStyle = bg; g.fillRect(x, yy, w, h); g.fillStyle = "#fff"; g.fillText(t, x + 5 * s, yy + 14 * s);
+}
+
+// ---------------------------------------------------------------- panels
+const pct = v => (v * 100).toFixed(v > 0.995 || v < 0.005 ? 1 : 0) + "%";
+const nice = s => s.replaceAll("_", " ");
+function bars(obj) {
+  return '<div class="bars">' + Object.entries(obj).sort((a, b) => b[1] - a[1]).map(([k, v]) =>
+    `<div class="bar"><span>${nice(k)}</span><div class="track"><div class="fill" style="width:${(v * 100).toFixed(1)}%"></div></div><span class="v">${pct(v)}</span></div>`).join("") + "</div>";
+}
+function render(res, streaming) {
+  const a = res.advisory;
+  const sp = $("speed");
+  if (a.recommended_kmh) { sp.className = "speed"; sp.textContent = a.recommended_kmh; }
+  else { sp.className = "speed none"; sp.textContent = "no limit"; }
+  $("hazard").innerHTML = `<span class="hazard h${a.hazard_level}">${ICON[a.hazard_level]}${HAZ[a.hazard_level]}</span>`;
+  $("adv-kv").innerHTML = [
+    ["Posted", a.posted_limit_kmh ? a.posted_limit_kmh + " km/h" : "—"],
+    ["Advised", a.recommended_kmh ? a.recommended_kmh + " km/h" : "—"],
+    ["Friction μ", a.mu ?? "—"],
+    ["Braking", a.braking_distance_ratio ? a.braking_distance_ratio + "× dry" : "—"],
+  ].map(([k, v]) => `<span>${k}</span><span>${v}</span>`).join("");
+  $("msgs").innerHTML = a.messages.map(m => `<li>${m}</li>`).join("") || '<li>No hazards detected.</li>';
+
+  $("signs").innerHTML = res.signs.length ? res.signs.map(s => `
+    <div class="sign ${s.accepted ? "" : "rej"}">
+      <img src="${s.crop}" alt="sign crop">${s.cam ? `<img src="${s.cam}" alt="Grad-CAM heatmap" title="Grad-CAM: where the network looked">` : "<span></span>"}
+      <div><div class="name">${s.accepted ? s.name : "Uncertain — " + s.name + "?"}</div>
+      <div class="meta">${s.group} · ${pct(s.conf)} confident${res.mode === "scene" ? " · det " + pct(s.det_score) : ""}</div>
+      <div class="meta">alt: ${s.top3.slice(1).map(t => `${t[0]} ${pct(t[1])}`).join(", ")}</div></div>
+    </div>`).join("") : `<span class="hint">${res.mode === "surface" ? "Not analysed in road-patch mode." : "No signs detected."}</span>`;
+
+  const sf = res.surface;
+  if (sf) {
+    let fr = sf.friction;
+    if (streaming) {  // temporal smoothing of the surface state across video frames
+      smooth = smooth ? Object.fromEntries(Object.entries(fr).map(([k, v]) => [k, 0.7 * smooth[k] + 0.3 * v])) : fr;
+      fr = smooth;
+    }
+    const ood = sf.in_domain === false ? `<p class="hazard h1" style="margin:0 0 10px">${ICON[1]}Outside training domain — not used for advice</p>
+      <p class="hint" style="margin:-4px 0 10px">The surface model was trained on a road-facing camera; this view differs too much (distance ${sf.ood_ratio}× the accept limit). Try “Road patch” mode with a close-up of the road.</p>` : "";
+    $("surface").innerHTML = ood + `<div class="big" style="${sf.in_domain === false ? "opacity:.55" : ""}">${nice(sf.class)} <span class="hint">${pct(sf.confidence)}</span></div>
+      <h2 style="margin-top:4px">Friction state</h2>${bars(fr)}
+      <div class="split">
+        <div><h2>Material</h2>${sf.material ? bars(sf.material) : '<span class="hint">covered</span>'}</div>
+        <div><h2>Unevenness</h2>${sf.unevenness ? bars(sf.unevenness) : '<span class="hint">n/a</span>'}</div>
+      </div>`;
+  } else $("surface").innerHTML = '<span class="hint">Not analysed in sign mode.</span>';
+  const dm = res.damage || [];
+  $("damage").innerHTML = res.mode !== "scene" ? '<span class="hint">Analysed in full-frame mode only.</span>'
+    : dm.length ? '<div class="bars">' + dm.map(d => `<div class="bar"><span>${d.name}</span><div class="track"><div class="fill" style="width:${(d.score * 100).toFixed(1)}%;background:${DMG_COL[d.name]}"></div></div><span class="v">${pct(d.score)}</span></div>`).join("") + "</div>"
+    : '<span class="hint">No cracks or potholes detected.</span>';
+  $("timings").innerHTML = Object.entries(res.timings).map(([k, v]) => `<span class="pill">${k.replace("_ms", "")} ${v} ms</span>`).join("");
+}
+
+// ---------------------------------------------------------------- model card
+let cardLoaded = false;
+async function loadCard() {
+  if (cardLoaded) return; cardLoaded = true;
+  const m = await (await fetch("/api/model-card")).json();
+  const el = $("card-view");
+  if (!m.headline) { el.innerHTML = '<div class="card">Model card not generated yet.</div>'; return; }
+  el.innerHTML = `
+    <div class="metrics">${m.headline.map(h => `<div class="card metric"><div class="n">${h.value}</div><div class="l">${h.label}</div></div>`).join("")}</div>
+    ${m.tables.map(t => `<div class="card"><h2>${t.title}</h2><table><tr>${t.columns.map(c => `<th>${c}</th>`).join("")}</tr>
+      ${t.rows.map(r => `<tr>${r.map((v, i) => `<td class="${i ? "num" : ""}">${v}</td>`).join("")}</tr>`).join("")}</table>${t.note ? `<p class="hint">${t.note}</p>` : ""}</div>`).join("")}
+    <div class="card figs"><h2>Figures</h2>${m.figures.map(f => `<p class="hint" style="margin-top:14px">${f.caption}</p><img src="${f.url}" alt="${f.caption}" loading="lazy">`).join("")}</div>`;
+}
+</script>
+</body>
+</html>

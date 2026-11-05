@@ -1,0 +1,5 @@
+{
+  "surface_temperature": 1.0,
+  "surface_joint_temperature": 1.1074185371398926,
+  "surface_run": "convnext_multi_192"
+}

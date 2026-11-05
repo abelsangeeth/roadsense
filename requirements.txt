@@ -1,0 +1,13 @@
+# torch / torchvision: install from https://download.pytorch.org/whl/cu128 (or CPU wheels)
+torch>=2.5
+torchvision>=0.20
+numpy
+pillow
+scikit-learn
+matplotlib
+pyarrow
+fastapi
+uvicorn
+python-multipart
+httpx
+pytest

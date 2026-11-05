@@ -1,0 +1,13 @@
+{
+  "sign_temperature": 0.17718638479709625,
+  "sign_accept_threshold": 0.6026778221130371,
+  "surface_temperature": 1.0,
+  "surface_joint_temperature": 1.1074185371398926,
+  "surface_run": "convnext_multi_192",
+  "sign_run": "full_s0",
+  "detector_threshold": 0.86,
+  "detector_val_f1": 0.9911,
+  "damage_threshold": 0.7387,
+  "damage_run": "damage",
+  "damage_val_f1": 0.578
+}

@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+runs/*
+!runs/release/
+runs/release/*.pt
+.pytest_cache/
+dist/
+*.log

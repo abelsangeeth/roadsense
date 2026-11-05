@@ -1,0 +1,15 @@
+{
+  "threshold": 901.1020622536055,
+  "quantile": 0.999,
+  "rscd_val_accepted": 0.9989296226919989,
+  "rscd_test_accepted (unseen days)": 0.9863896848137536,
+  "gtsdb_dashcam_rejected": 0.9814814814814815,
+  "gtsdb_val_rejected": 0.9722222222222222,
+  "gtsdb_test_rejected": 1.0,
+  "features": "mean/std of backbone blocks (1, 2, 3, 4)",
+  "n_gtsdb": 162,
+  "median_score": {
+    "rscd_test": 251.76972241269323,
+    "gtsdb": 1475.3313666919494
+  }
+}

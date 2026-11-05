@@ -1,0 +1,283 @@
+{
+  "headline": [
+    {
+      "value": "99.84%",
+      "label": "GTSRB test accuracy, 12,630 signs (mean of 3 seeds)"
+    },
+    {
+      "value": "95.7%",
+      "label": "Sign detection AP@0.5, GTSDB test scenes"
+    },
+    {
+      "value": "93.9%",
+      "label": "End-to-end recognition rate (found + named), GTSDB test"
+    },
+    {
+      "value": "87.0%",
+      "label": "Road friction-state accuracy, unseen capture days"
+    },
+    {
+      "value": "0.59",
+      "label": "Dashcam road-damage F1 (cracks + potholes), RDD2022 held-out frames"
+    },
+    {
+      "value": "8 fps",
+      "label": "Sign + surface pipeline throughput, before the damage detector was added (RTX 3060 laptop)"
+    }
+  ],
+  "tables": [
+    {
+      "title": "Traffic-sign recognition: ablation (GTSRB official test)",
+      "columns": [
+        "variant",
+        "accuracy",
+        "macro-F1",
+        "accuracy under corruption"
+      ],
+      "rows": [
+        [
+          "SignNet (full)",
+          "99.84% \u00b1 0.02",
+          "0.9978",
+          "91.1%"
+        ],
+        [
+          "- STN",
+          "99.79%",
+          "0.9971",
+          "92.5%"
+        ],
+        [
+          "- SE attention",
+          "99.82%",
+          "0.9976",
+          "91.0%"
+        ],
+        [
+          "basic aug only",
+          "99.67%",
+          "0.9952",
+          "86.2%"
+        ],
+        [
+          "no augmentation",
+          "99.34%",
+          "0.9925",
+          "86.9%"
+        ]
+      ],
+      "note": "Corruption column: mean over 9 road-scene corruptions x 3 severities (noise, motion blur, defocus, fog, rain, low light, glare, occlusion, JPEG)."
+    },
+    {
+      "title": "Road-surface condition (RSCD, capture-day-disjoint test)",
+      "columns": [
+        "model",
+        "27-class acc",
+        "27-class macro-F1",
+        "friction",
+        "material",
+        "unevenness"
+      ],
+      "rows": [
+        [
+          "SE-ResNet from scratch, multi-head (128x192)",
+          "54.2%",
+          "0.451",
+          "80.1%",
+          "72.5%",
+          "64.8%"
+        ],
+        [
+          "EfficientNet-B0 flat 27-way (128x192)",
+          "63.8%",
+          "0.554",
+          "85.8%",
+          "79.4%",
+          "75.7%"
+        ],
+        [
+          "EfficientNet-B0 multi-head (128x192)",
+          "64.7%",
+          "0.554",
+          "85.9%",
+          "80.0%",
+          "75.9%"
+        ],
+        [
+          "EfficientNet-B0 multi-head (192x288)",
+          "65.3%",
+          "0.566",
+          "87.4%",
+          "81.6%",
+          "75.3%"
+        ],
+        [
+          "ConvNeXt-Tiny multi-head (192x288)",
+          "66.6%",
+          "0.565",
+          "87.0%",
+          "82.6%",
+          "77.9%"
+        ]
+      ],
+      "note": "Official RSCD split, same EfficientNet multi-head recipe: 27-class acc 82.2%, friction 93.3%. 84% of official test images share their capture second with a training image, so the day-disjoint numbers are the honest estimate."
+    },
+    {
+      "title": "Scene pipeline (GTSDB test, never used to train SignNet)",
+      "columns": [
+        "metric",
+        "value"
+      ],
+      "rows": [
+        [
+          "detection AP@0.5 (class-agnostic)",
+          "95.7%"
+        ],
+        [
+          "detection AP@[.5:.95]",
+          "83.5%"
+        ],
+        [
+          "43-class AP@0.5 (detector x SignNet)",
+          "94.7%"
+        ],
+        [
+          "recall at operating threshold",
+          "95.1%"
+        ],
+        [
+          "classification accuracy of found signs",
+          "98.7%"
+        ],
+        [
+          "false positives / image",
+          "0.04"
+        ],
+        [
+          "median latency",
+          "121 ms"
+        ],
+        [
+          "detector val AP@0.5 / AP@[.5:.95]",
+          "98.0% / 84.1%"
+        ]
+      ],
+      "note": "Test split: 54 scenes, 82 signs (small; val numbers shown for stability)."
+    },
+    {
+      "title": "Road damage from the dashcam (RDD2022, held-out frames from 6 countries)",
+      "columns": [
+        "class",
+        "AP@0.5",
+        "boxes"
+      ],
+      "rows": [
+        [
+          "longitudinal crack",
+          "0.587",
+          2386
+        ],
+        [
+          "transverse crack",
+          "0.565",
+          1035
+        ],
+        [
+          "alligator crack",
+          "0.661",
+          989
+        ],
+        [
+          "pothole",
+          "0.502",
+          611
+        ],
+        [
+          "all classes: mAP@0.5 / F1",
+          "0.579 / 0.588",
+          5021
+        ]
+      ],
+      "note": "F1 at the validation-chosen threshold 0.74: precision 62.2%, recall 55.8%. By country: Japan 0.59, India 0.45, Czech 0.46, Norway 0.45, United States 0.69, China MotorBike 0.79. On 54 unseen German frames it flags damage on 4 and reports no potholes."
+    },
+    {
+      "title": "Calibration and abstention (SignNet)",
+      "columns": [
+        "metric",
+        "value"
+      ],
+      "rows": [
+        [
+          "temperature (fitted on val)",
+          "0.177"
+        ],
+        [
+          "ECE raw -> calibrated",
+          "9.24% -> 0.17%"
+        ],
+        [
+          "accept threshold (val risk <= 0.1%)",
+          "0.603"
+        ],
+        [
+          "test coverage at threshold",
+          "99.95%"
+        ],
+        [
+          "test error on accepted signs",
+          "0.166%"
+        ],
+        [
+          "test errors caught by abstention",
+          "1 of 22"
+        ]
+      ]
+    }
+  ],
+  "figures": [
+    {
+      "url": "/reports/signs/confusion.png",
+      "caption": "SignNet confusion matrix on GTSRB test (off-diagonal counts in red)."
+    },
+    {
+      "url": "/reports/signs/robustness.png",
+      "caption": "Sign accuracy under road-scene corruptions: the augmentation pipeline is what buys robustness."
+    },
+    {
+      "url": "/reports/signs/calibration.png",
+      "caption": "Risk-coverage and reliability: abstaining on the least confident signs."
+    },
+    {
+      "url": "/reports/signs/explain_gallery.png",
+      "caption": "Input, spatial-transformer output and Grad-CAM for correct and misclassified signs."
+    },
+    {
+      "url": "/reports/surface/confusion.png",
+      "caption": "Road-surface confusion matrices on unseen capture days."
+    },
+    {
+      "url": "/reports/surface/robustness.png",
+      "caption": "Friction-state accuracy under corruption."
+    },
+    {
+      "url": "/reports/surface/explain_gallery.png",
+      "caption": "Grad-CAM of the friction head."
+    },
+    {
+      "url": "/reports/damage/examples.jpg",
+      "caption": "Damage detector: red = prediction, blue = ground truth. Top two rows: RDD2022 test frames; bottom row: German GTSDB frames with no damage labels."
+    },
+    {
+      "url": "/reports/e2e/scene_00026.jpg",
+      "caption": "GTSDB test scene 00026: green = detected and correctly named, red = error, white = ground truth."
+    },
+    {
+      "url": "/reports/e2e/scene_00028.jpg",
+      "caption": "GTSDB test scene 00028: green = detected and correctly named, red = error, white = ground truth."
+    },
+    {
+      "url": "/reports/e2e/scene_00032.jpg",
+      "caption": "GTSDB test scene 00032: green = detected and correctly named, red = error, white = ground truth."
+    }
+  ]
+}
